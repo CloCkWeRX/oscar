@@ -75,7 +75,8 @@ trello_grocery_board = m.group(1)
 m = re.search('/b/([^/]+)', trello_db_board_url)
 trello_db_board = m.group(1)
 trello_grocery_list = 'Groceries'
-
+gmail_user = ''
+twilio_src = ''
 ######################################## Communication
 print
 print "Oscar can email or text you when it scans something it doesn't recognize. This"
