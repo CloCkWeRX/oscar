@@ -209,6 +209,8 @@ while True:
     try:
         desc = u.get_description(barcode)
         print "Received description '{0}' for barcode {1}".format(desc, repr(barcode))
+        add_grocery_item(trello_api, {"item": desc, "barcode": barcode})
+        continue
     except urllib2.HTTPError, e:
         if 'UPC/EAN code invalid' in e.msg:
             print "Barcode {0} not recognized as a UPC; creating learning opportunity".format(repr(barcode))
@@ -225,15 +227,6 @@ while True:
         else:
             raise
 
-    # Match against description rules
-    desc_rule = match_description_rule(trello_db, desc)
-    if desc_rule is not None:
-        desc_rule["barcode"] = barcode
-        add_grocery_item(trello_api, desc_rule)
-        continue
-    if desc_rule is None:
-        add_grocery_item(trello_api, {"item": desc, "barcode": barcode})
-        continue
 
 
     print "Don't know what to add for product description '{0}'".format(desc)
