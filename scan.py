@@ -158,13 +158,13 @@ def add_grocery_item(trello_api, item):
     if item["item"] not in card_names:
         print "Adding '{0}' to grocery list".format(item["item"])
         generated_description = []
-        generated_description.push("Barcode: {0}".format(item["barcode"]))
+        generated_description.append("Barcode: {0}".format(item["barcode"]))
 
         # TODO Read configuration to see if either are enabled
-        generated_description.push("[Coles](http://shop.coles.com.au/online/SearchDisplay?storeId={1}&catalogId=10576&langId=-1&beginIndex=0&browseView=false&searchSource=Q&sType=SimpleSearch&resultCatEntryType=2&showResultsPage=true&pageView=image&searchTerm={0})".format(item["barcode"], "10601"))
-        generated_description.push("[Woolworths](http://www2.woolworthsonline.com.au/Shop/SearchProducts?search={0})".format(item["barcode"], "10601"))
+        generated_description.append("[Coles](http://shop.coles.com.au/online/SearchDisplay?storeId={1}&catalogId=10576&langId=-1&beginIndex=0&browseView=false&searchSource=Q&sType=SimpleSearch&resultCatEntryType=2&showResultsPage=true&pageView=image&searchTerm={0})".format(item["barcode"], "10601"))
+        generated_description.append("[Woolworths](http://www2.woolworthsonline.com.au/Shop/SearchProducts?search={0})".format(item["barcode"], "10601"))
           
-        trello_api.lists.new_card(grocery_list['id'], item["item"], generated_description.join("\n"))
+        trello_api.lists.new_card(grocery_list['id'], item["item"], "\n".join(generated_description))
     else:
         print "Item '{0}' is already on the grocery list; not adding".format(item["item"])
 
@@ -228,6 +228,7 @@ while True:
     # Match against description rules
     desc_rule = match_description_rule(trello_db, desc)
     if desc_rule is not None:
+        desc_rule["barcode"] = barcode
         add_grocery_item(trello_api, desc_rule)
         continue
     if desc_rule is None:
