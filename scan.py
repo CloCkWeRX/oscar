@@ -154,12 +154,19 @@ def add_grocery_item(trello_api, item):
     cards = trello_api.lists.get_card(grocery_list['id'])
     card_names = [card['name'] for card in cards]
 
-    # Add item if it's not there already
-    if item not in card_names:
-        print "Adding '{0}' to grocery list".format(item)
-        trello_api.lists.new_card(grocery_list['id'], item)
+    # Add name if it's not there already
+    if item["item"] not in card_names:
+        print "Adding '{0}' to grocery list".format(item["item"])
+        generated_description = []
+        generated_description.push("Barcode: {0}".format(item["barcode"]))
+
+        # TODO Read configuration to see if either are enabled
+        generated_description.push("[Coles](http://shop.coles.com.au/online/SearchDisplay?storeId={1}&catalogId=10576&langId=-1&beginIndex=0&browseView=false&searchSource=Q&sType=SimpleSearch&resultCatEntryType=2&showResultsPage=true&pageView=image&searchTerm={0})".format(item["barcode"], "10601"))
+        generated_description.push("[Woolworths](http://www2.woolworthsonline.com.au/Shop/SearchProducts?search={0})".format(item["barcode"], "10601"))
+          
+        trello_api.lists.new_card(grocery_list['id'], item["item"], generated_description.join("\n"))
     else:
-        print "Item '{0}' is already on the grocery list; not adding".format(item)
+        print "Item '{0}' is already on the grocery list; not adding".format(item["item"])
 
 
 trello_api = trello.TrelloApi(conf.get()['trello_app_key'])
@@ -194,7 +201,7 @@ while True:
     # Match against barcode rules
     barcode_rule = match_barcode_rule(trello_db, barcode)
     if barcode_rule is not None:
-        add_grocery_item(trello_api, barcode_rule['item'])
+        add_grocery_item(trello_api, barcode_rule)
         continue
 
     # Get the item's description
@@ -221,7 +228,11 @@ while True:
     # Match against description rules
     desc_rule = match_description_rule(trello_db, desc)
     if desc_rule is not None:
-        add_grocery_item(trello_api, desc_rule['item'])
+        add_grocery_item(trello_api, desc_rule)
         continue
+    if desc_rule is None:
+        add_grocery_item(trello_api, {"item": desc, "barcode": barcode})
+        continue
+
 
     print "Don't know what to add for product description '{0}'".format(desc)
